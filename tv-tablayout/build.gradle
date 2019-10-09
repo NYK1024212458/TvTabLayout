@@ -30,7 +30,7 @@ publish {
     userOrg = 'zhousuqiang'
     groupId = 'com.owen'
     artifactId = 'tv-tablayout'
-    publishVersion = '1.0.3'
+    publishVersion = '1.0.4'
     desc = 'TvTabLayout'
     website = 'https://github.com/zhousuqiang/TvTabLayout'
 }

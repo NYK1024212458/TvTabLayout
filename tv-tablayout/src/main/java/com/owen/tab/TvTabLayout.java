@@ -882,7 +882,13 @@ public class TvTabLayout extends HorizontalScrollView {
             };
             addOnTabSelectedListener(mCurrentVpSelectedListener);
 
-            selectTab(viewPager.getCurrentItem());
+            final PagerAdapter adapter = viewPager.getAdapter();
+            if (adapter != null) {
+                final int adapterCount = adapter.getCount();
+                for (int i = 0; i < adapterCount; i++) {
+                    addTab(newTab().setText(adapter.getPageTitle(i)), viewPager.getCurrentItem() == i);
+                }
+            }
         } else {
             // We've been given a null ViewPager so we need to clear out the internal state,
             // listeners and observers
