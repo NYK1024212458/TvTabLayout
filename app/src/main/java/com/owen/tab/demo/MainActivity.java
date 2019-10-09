@@ -19,6 +19,7 @@ public class MainActivity extends AppCompatActivity {
         TvTabLayout mTabLayout2 = findViewById(R.id.tablayout2);
         TvTabLayout mTabLayout3 = findViewById(R.id.tablayout3);
         TvTabLayout mTabLayout4 = findViewById(R.id.tablayout4);
+
         for(int i=0; i<15; i++) {
             mTabLayout.addTab(mTabLayout.newTab().setText("标题"+i), i == 0);
             mTabLayout2.addTab(mTabLayout2.newTab().setText("标题"+i));

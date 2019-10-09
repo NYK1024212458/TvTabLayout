@@ -10,7 +10,7 @@
 ### Android Studio 集成
 
 ```java
-implementation 'com.owen:tv-tablayout:1.0.1'
+implementation 'com.owen:tv-tablayout:1.0.3'
 ```
 
 ### 自定义属性

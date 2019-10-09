@@ -220,6 +220,23 @@ public class TvTabLayout extends HorizontalScrollView {
         public void onTabReselected(Tab tab);
     }
 
+    public class SimpleOnTabSelectedListener implements OnTabSelectedListener {
+        @Override
+        public void onTabReselected(Tab tab) {
+
+        }
+
+        @Override
+        public void onTabSelected(Tab tab) {
+
+        }
+
+        @Override
+        public void onTabUnselected(Tab tab) {
+
+        }
+    }
+
     private final ArrayList<Tab> mTabs = new ArrayList<>();
     private Tab mSelectedTab;
 
@@ -257,7 +274,7 @@ public class TvTabLayout extends HorizontalScrollView {
     private ViewPager mViewPager;
     private PagerAdapter mPagerAdapter;
     private DataSetObserver mPagerAdapterObserver;
-    private TabLayoutOnPageChangeListener mPageChangeListener;
+    private ViewPager.OnPageChangeListener mPageChangeListener;
     private AdapterChangeListener mAdapterChangeListener;
     private boolean mSetupViewPagerImplicitly;
 
@@ -827,11 +844,55 @@ public class TvTabLayout extends HorizontalScrollView {
      *                    content changes
      */
     public void setupWithViewPager(@Nullable final ViewPager viewPager, boolean autoRefresh) {
-        setupWithViewPager(viewPager, autoRefresh, true);
+        setupWithViewPager(viewPager, autoRefresh, true, true);
+    }
+
+    public void setupWithViewPagerNoScrolledOffset(@Nullable final ViewPager viewPager) {
+        if (viewPager != null) {
+            // If we've already been setup with a ViewPager, remove us from it
+            if (mPageChangeListener != null) {
+                viewPager.removeOnPageChangeListener(mPageChangeListener);
+            }
+        }
+
+        if (mCurrentVpSelectedListener != null) {
+            // If we already have a tab selected listener for the ViewPager, remove it
+            removeOnTabSelectedListener(mCurrentVpSelectedListener);
+            mCurrentVpSelectedListener = null;
+        }
+
+        if (viewPager != null) {
+            // Add our custom OnPageChangeListener to the ViewPager
+            if (mPageChangeListener == null) {
+                mPageChangeListener = new ViewPager.SimpleOnPageChangeListener() {
+                    @Override
+                    public void onPageSelected(int position) {
+                        selectTab(position);
+                    }
+                };
+            }
+            viewPager.addOnPageChangeListener(mPageChangeListener);
+
+            // Now we'll add a tab selected listener to set ViewPager's current item
+            mCurrentVpSelectedListener = new SimpleOnTabSelectedListener() {
+                @Override
+                public void onTabSelected(Tab tab) {
+                    viewPager.setCurrentItem(tab.mPosition, true);
+                }
+            };
+            addOnTabSelectedListener(mCurrentVpSelectedListener);
+
+            selectTab(viewPager.getCurrentItem());
+        } else {
+            // We've been given a null ViewPager so we need to clear out the internal state,
+            // listeners and observers
+            mViewPager = null;
+            setPagerAdapter(null, false);
+        }
     }
 
     private void setupWithViewPager(@Nullable final ViewPager viewPager, boolean autoRefresh,
-                                    boolean implicitSetup) {
+                                    boolean implicitSetup, boolean isScrolledOffset) {
         if (mViewPager != null) {
             // If we've already been setup with a ViewPager, remove us from it
             if (mPageChangeListener != null) {
@@ -853,9 +914,9 @@ public class TvTabLayout extends HorizontalScrollView {
 
             // Add our custom OnPageChangeListener to the ViewPager
             if (mPageChangeListener == null) {
-                mPageChangeListener = new TabLayoutOnPageChangeListener(this);
+                mPageChangeListener = new TabLayoutOnPageChangeListener(this, isScrolledOffset);
             }
-            mPageChangeListener.reset();
+            ((TabLayoutOnPageChangeListener)mPageChangeListener).reset();
             viewPager.addOnPageChangeListener(mPageChangeListener);
 
             // Now we'll add a tab selected listener to set ViewPager's current item
@@ -915,7 +976,7 @@ public class TvTabLayout extends HorizontalScrollView {
             if (vp instanceof ViewPager) {
                 // If we have a ViewPager parent and we've been added as part of its decor, let's
                 // assume that we should automatically setup to display any titles
-                setupWithViewPager((ViewPager) vp, true, true);
+                setupWithViewPager((ViewPager) vp, true, true, true);
             }
         }
     }
@@ -2366,9 +2427,11 @@ public class TvTabLayout extends HorizontalScrollView {
         private final WeakReference<TvTabLayout> mTabLayoutRef;
         private int mPreviousScrollState;
         private int mScrollState;
+        private boolean mIsScrolledOffset;
 
-        public TabLayoutOnPageChangeListener(TvTabLayout tabLayout) {
+        public TabLayoutOnPageChangeListener(TvTabLayout tabLayout, boolean isScrolledOffset) {
             mTabLayoutRef = new WeakReference<>(tabLayout);
+            mIsScrolledOffset = isScrolledOffset;
         }
 
         @Override
@@ -2381,7 +2444,7 @@ public class TvTabLayout extends HorizontalScrollView {
         public void onPageScrolled(final int position, final float positionOffset,
                                    final int positionOffsetPixels) {
             final TvTabLayout tabLayout = mTabLayoutRef.get();
-            if (tabLayout != null) {
+            if (tabLayout != null && mIsScrolledOffset) {
                 // Only update the text selection if we're not settling, or we are settling after
                 // being dragged
                 final boolean updateText = mScrollState != SCROLL_STATE_SETTLING ||
