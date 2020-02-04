@@ -10,7 +10,11 @@
 ### Android Studio 集成
 
 ```java
+// support版本
 implementation 'com.owen:tv-tablayout:1.0.4'
+
+// androidx版本
+implementation 'com.owen:tv-tablayout:2.0.0'
 ```
 
 ### 自定义属性

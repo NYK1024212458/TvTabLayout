@@ -10,8 +10,6 @@ android {
         versionCode 1
         versionName "1.0"
 
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
-
     }
 
     buildTypes {
@@ -30,12 +28,12 @@ publish {
     userOrg = 'zhousuqiang'
     groupId = 'com.owen'
     artifactId = 'tv-tablayout'
-    publishVersion = '1.0.4'
+    publishVersion = '2.0.0'
     desc = 'TvTabLayout'
     website = 'https://github.com/zhousuqiang/TvTabLayout'
 }
 
 dependencies {
     api fileTree(dir: 'libs', include: ['*.jar'])
-    api "com.android.support:appcompat-v7:$rootProject.ext.supportVersion"
+    api "androidx.appcompat:appcompat:1.1.0"
 }
